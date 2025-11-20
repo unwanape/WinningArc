@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WinningArc - Degen Edition</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* ------------------ DEGEN GRADIENT THEME ------------------ */
+:root {
+  --text-color: #fff;
+  --card-bg: rgba(255,255,255,0.1);
+  --nav-bg: rgba(0,0,0,0.5);
+  --button-bg: #ff49db;
+  --button-text: #fff;
+}
+body.dark-mode {
+  --card-bg: rgba(255,255,255,0.15);
+  background: linear-gradient(-45deg,#222,#333,#111,#444);
+}
+body {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: var(--text-color);
+  background: linear-gradient(-45deg,#ff6ec4,#7873f5,#42e695,#f3ff5c);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  transition: background 0.3s, color 0.3s;
+}
+@keyframes gradient {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+header{text-align:center;padding:50px 20px;}
+header img{max-width:200px;border-radius:20px;box-shadow:0 0 15px #fff;}
+h1{font-size:3rem;margin-bottom:10px;}
+
+/* Hamburger menu */
+.menu-button {position: fixed; top: 20px; left: 20px; z-index: 20; font-size: 2rem; background: var(--nav-bg); color: var(--text-color); border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; transition: transform 0.2s;}
+.menu-button:hover { transform: scale(1.1); }
+/* Mobile menu */
+.mobile-nav {position: fixed; top: 80px; left: 20px; background: var(--nav-bg); backdrop-filter: blur(5px); padding: 20px; border-radius: 15px; display: flex; flex-direction: column; gap: 15px; z-index: 20;}
+.mobile-nav a {color: var(--text-color); font-size: 1.2rem; text-decoration: none;}
+.hidden { display: none; }
+
+section { padding: 40px 20px; animation: fadeIn 0.8s ease; }
+@keyframes fadeIn {0%{opacity:0;}100%{opacity:1;}}
+
+.section-title { font-size: 2rem; margin-bottom: 20px; text-align: center; font-weight: 900; text-decoration: underline; }
+
+/* Glowing headers for Degen guide */
+.section-title.degen-glow { animation: glow1 1.5s infinite alternate; }
+.section-title.apps { animation: glow2 1.5s infinite alternate; }
+.section-title.profits { animation: glow3 1.5s infinite alternate; }
+.section-title.terms { animation: glow4 1.5s infinite alternate; }
+.section-title.getting { animation: glow5 1.5s infinite alternate; }
+.section-title.trojan { animation: glow6 1.5s infinite alternate; }
+.section-title.dex { animation: glow7 1.5s infinite alternate; }
+.section-title.conclusion { animation: glow8 1.5s infinite alternate; }
+@keyframes glow1 { from { text-shadow:0 0 10px #ff4d4d; } to { text-shadow:0 0 20px #ff0000; } }
+@keyframes glow2 { from { text-shadow:0 0 10px #57ffdd; } to { text-shadow:0 0 20px #00ffcc; } }
+@keyframes glow3 { from { text-shadow:0 0 10px #ffdd57; } to { text-shadow:0 0 20px #ffcc00; } }
+@keyframes glow4 { from { text-shadow:0 0 10px #a57dff; } to { text-shadow:0 0 20px #8a2be2; } }
+@keyframes glow5 { from { text-shadow:0 0 10px #ff57dd; } to { text-shadow:0 0 20px #ff00cc; } }
+@keyframes glow6 { from { text-shadow:0 0 10px #57aaff; } to { text-shadow:0 0 20px #0080ff; } }
+@keyframes glow7 { from { text-shadow:0 0 10px #57ff57; } to { text-shadow:0 0 20px #00cc00; } }
+@keyframes glow8 { from { text-shadow:0 0 10px #ff57a5; } to { text-shadow:0 0 20px #ff007f; } }
+
+/* Boxes for Degen guide */
+.box { border: 2px solid #ffdd57; border-radius:12px; padding:20px; margin:20px; background-color:#2c2c3d; box-shadow:0 0 20px #ffdd57 inset; }
+.box img { max-width:100%; display:block; margin:10px auto; }
+.image-placeholder { width:100%; height:300px; background:#444; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2em; border-radius:8px; margin:10px 0; }
+
+/* Cards for WinningArc home */
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+.card { background: var(--card-bg); padding: 20px; border-radius: 15px; backdrop-filter: blur(5px); cursor:pointer; transition: transform 0.3s, background 0.3s, box-shadow 0.3s; }
+.card:hover { transform:scale(1.05); background:rgba(255,255,255,0.25); box-shadow:0 0 15px #ff49db,0 0 25px #7873f5; }
+.card-glow { animation: psychedelicGlow 2s infinite; }
+@keyframes psychedelicGlow {
+0% { box-shadow:0 0 10px #ff49db,0 0 20px #7873f5; transform:scale(1);}
+25% { box-shadow:0 0 15px #42e695,0 0 30px #f3ff5c; transform:scale(1.03);}
+50% { box-shadow:0 0 20px #ff6ec4,0 0 35px #7873f5; transform:scale(1.05);}
+75% { box-shadow:0 0 15px #f3ff5c,0 0 30px #42e695; transform:scale(1.03);}
+100% { box-shadow:0 0 10px #ff49db,0 0 20px #7873f5; transform:scale(1);}
+}
+
+/* Input & Buttons */
+input, button { padding:10px;margin:5px 0;border-radius:8px;border:none; }
+input { width:100%; max-width:300px; }
+button { background: var(--button-bg); color: var(--button-text); font-weight:bold; cursor:pointer; transition:background 0.3s,color 0.3s,transform 0.2s,box-shadow 0.3s;}
+button:hover { transform:scale(1.05); box-shadow:0 0 10px #ff49db,0 0 20px #7873f5; opacity:0.9; }
+.connect-btn { animation: pulse 2s infinite; }
+@keyframes pulse {0%{transform:scale(1);box-shadow:0 0 5px rgba(255,255,255,0.3);}50%{transform:scale(1.1);box-shadow:0 0 20px #ff49db,0 0 30px #7873f5;}100%{transform:scale(1);box-shadow:0 0 5px rgba(255,255,255,0.3);}}
+
+/* Footer */
+footer{text-align:center;padding:30px 20px;background:rgba(0,0,0,0.4);margin-top:40px;font-size:1rem;display:flex;flex-direction:column;gap:10px;align-items:center;}
+#solPrice{font-weight:bold;color:#f0ff00;font-size:1.2rem;}
+#solChart{width:200px;height:50px;}
+.theme-switcher{position:fixed;top:20px;right:20px;cursor:pointer;background:none;border:none;font-size:1.8rem;color:var(--text-color);z-index:30;}
+</style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<button id="themeToggle" class="theme-switcher">🌙</button>
+
+<!-- Hamburger Menu -->
+<button id="menuBtn" class="menu-button">☰</button>
+
+<!-- Slide-out Navigation -->
+<nav id="mobileNav" class="mobile-nav hidden">
+  <a href="#home" onclick="showSection('home'); toggleMenu()">Home</a>
+  <a href="#memecoins" onclick="showSection('memecoins'); toggleMenu()">Meme Coins</a>
+  <a href="#degen" onclick="showSection('degen'); toggleMenu()">Degen Strategies</a>
+  <a href="#connect" onclick="showSection('connect'); toggleMenu()">Connect</a>
+  <a href="#" id="logoutBtn" style="display:none;" onclick="logout()">Logout</a>
+</nav>
+
+<!-- Home Section -->
+<section id="home">
+<header>
+  <img src="IMG_20251115_183702.jpg" alt="WinningArc Cover Image" />
+  <h1>WinningArc</h1>
+  <p>Degen Crypto. Only the wildest trades.</p>
+</header>
+<h2 class="section-title">Learn Degen Moves</h2>
+<div class="cards">
+  <div class="card card-glow" onclick="showSection('memecoins')">
+    <h3>Meme Coins</h3>
+    <p>Learn how meme coins pump and the smartest entry/exit timing.</p>
+  </div>
+  <div class="card card-glow" onclick="showSection('degen')">
+    <h3>Degen Strategies</h3>
+    <p>Advanced degen moves for high-risk, high-reward trading.</p>
+  </div>
+</div>
+</section>
+
+<section id="memecoins" class="hidden">
+<h2 class="section-title degen-glow">Meme Coins</h2>
+<div class="box glow">
+  <!-- Paste your full Degen guide content here (terms, buying/selling with Trojan, Dex Screener, etc.) -->
+  <p>[(]</p>
+  <div class="image-placeholder">Image 1</div>
+  <div class="image-placeholder">Image 2</div>
+  <div class="image-placeholder">Image 3</div>
+  <!-- Continue for all images up to 20 -->
+</div>
+</section>
+
+<section id="degen" class="hidden">
+<h2 class="section-title degen-glow">Degen Strategies</h2>
+<div class="box glow">
+  <p>[High-risk strategies content]</p>
+</div>
+</section>
+
+<!-- Connect Section -->
+<section id="connect">
+  <h2 class="section-title">Connect with me</h2>
+  <div style="text-align:center; gap:20px; display:flex; justify-content:center; flex-wrap:wrap;">
+    <a href="https://twitter.com/unwanape" target="_blank" style="text-decoration:none;">
+      <button class="connect-btn" style="background:#1DA1F2;">🐦 Follow on X</button>
+    </a>
+    <a href="https://t.me/unwanape" target="_blank" style="text-decoration:none;">
+      <button class="connect-btn" style="background:#0088cc;">✈️ Follow on TG</button>
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <canvas id="solChart"></canvas>
+  <p id="solPrice">Solana: $0.00</p>
+  <p>Contact: peterunwana50@gmail.com | @unwanape | @frank | @rektdeity</p>
+  <p>© 2025 WinningArc</p>
+</footer>
+
+<script>
+// THEME SWITCH
+const themeToggle = document.getElementById('themeToggle');
+const bodyEl = document.body;
+const savedTheme = localStorage.getItem('theme');
+if(savedTheme==='dark'){bodyEl.classList.add('dark-mode'); themeToggle.textContent='☀️';}
+themeToggle.addEventListener('click',()=>{
+  bodyEl.classList.toggle('dark-mode');
+  const isDark = bodyEl.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark?'dark':'light');
+  themeToggle.textContent = isDark?'☀️':'🌙';
+});
+
+// MENU LOGIC
+function toggleMenu(){document.getElementById('mobileNav').classList.toggle('hidden');}
+document.getElementById('menuBtn').addEventListener('click', toggleMenu);
+window.addEventListener('click', e => {
+  const menu = document.getElementById('mobileNav');
+  const btn = document.getElementById('menuBtn');
+  if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.add('hidden');
+});
+
+// SECTION SWITCHER
+function showSection(sectionId){
+  const sections = ['home','memecoins','degen','connect'];
+  sections.forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById(sectionId).classList.remove('hidden');
+  document.getElementById(sectionId).scrollIntoView({behavior:'smooth'});
+}
+
+// FIREBASE
+const firebaseConfig = {apiKey:"YOUR_API_KEY",authDomain:"YOUR_PROJECT_ID.firebaseapp.com",projectId:"YOUR_PROJECT_ID",storageBucket:"YOUR_PROJECT_ID.appspot.com",messagingSenderId:"YOUR_SENDER_ID",appId:"YOUR_APP_ID"};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function signup(){const username=document.getElementById('signupUsername')?.value;const email=document.getElementById('signupEmail')?.value;const password=document.getElementById('signupPassword')?.value;if(!username||!email||!password){alert('Fill all fields'); return;} auth.createUserWithEmailAndPassword(email,password).then(cred=>{db.collection('users').doc(cred.user.uid).set({username,email,joinedAt:new Date()}); alert('Signup successful!'); showSection('home'); showLogout();}).catch(err=>alert(err.message));}
+
+function login(){const email=document.getElementById('loginEmail')?.value;const password=document.getElementById('loginPassword')?.value;if(!email||!password){alert('Fill all fields'); return;} auth.signInWithEmailAndPassword(email,password).then(cred=>{alert('Login successful!'); showSection('home'); showLogout();}).catch(err=>alert(err.message));}
+
+function logout(){auth.signOut().then(()=>{alert('Logged out'); document.getElementById('logoutBtn').style.display='none'; showSection('home');});}
+function showLogout(){document.getElementById('logoutBtn').style.display='block';}
+auth.onAuthStateChanged(user=>{if(user){showLogout();}});
+
+// SOLANA PRICE & SPARKLINE
+const solPriceEl = document.getElementById('solPrice');
+const solChartCtx = document.getElementById('solChart').getContext('2d');
+const solData = {labels:[],datasets:[{label:'SOL',data:[],borderColor:'#f0ff00',backgroundColor:'rgba(240,255,0,0.2)',tension:0.3,pointRadius:0}]};
+const solChart = new Chart(solChartCtx,{type:'line',data:solData,options:{responsive:true,animation:false,scales:{x:{display:false},y:{display:true}},plugins:{legend:{display:false}}}});
+
+async function fetchSolPrice(){
+  try{
+    const res=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+    const data=await res.json();
+    const price=data.solana.usd;
+    solPriceEl.textContent=`Solana: $${price.toFixed(2)}`;
+    const now = new Date().toLocaleTimeString();
+    solData.labels.push(now); solData.datasets[0].data.push(price);
+    if(solData.labels.length>30){solData.labels.shift(); solData.datasets[0].data.shift();}
+    solChart.update();
+  }catch(e){console.error(e);}
+}
+fetchSolPrice(); setInterval(fetchSolPrice,1000);
+</script>
+</body>
+</html>
